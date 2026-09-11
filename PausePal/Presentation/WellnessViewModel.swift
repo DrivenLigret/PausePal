@@ -13,6 +13,7 @@ final class WellnessViewModel: ObservableObject {
     @Published var viewingMinutes = ""
     @Published var viewingEndedAt = Date()
     @Published var selectedMood: ViewingMood?
+    @Published var weeklyBudget = ""
     private let repository: WellnessJournalRepository
 
     init(repository: WellnessJournalRepository) {
@@ -24,6 +25,9 @@ final class WellnessViewModel: ObservableObject {
             journal = try repository.load()
             ready = true
             errorMessage = nil
+            if weeklyBudget.isEmpty, let goal = journal.weeklyGoal {
+                weeklyBudget = String(goal.budgetMinutes)
+            }
         } catch {
             ready = false
             errorMessage = error.localizedDescription
@@ -77,6 +81,22 @@ final class WellnessViewModel: ObservableObject {
             let useCase = CancelHealthyBreakUseCase(repository: repository)
             journal = try useCase.execute(breakID: id)
             notice = "Break cancelled."
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+    func saveGoal() {
+        guard ready else { return }
+        notice = nil
+        let input = weeklyBudget.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let minutes = Int(input) else {
+            errorMessage = SetWeeklyViewingGoalUseCase.Failure.invalidBudget.localizedDescription
+            return
+        }
+        do {
+            let useCase = SetWeeklyViewingGoalUseCase(repository: repository)
+            journal = try useCase.execute(budgetMinutes: minutes)
+            notice = "Weekly budget saved."
         } catch {
             errorMessage = error.localizedDescription
         }

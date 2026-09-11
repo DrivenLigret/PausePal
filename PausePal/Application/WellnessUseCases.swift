@@ -114,3 +114,27 @@ struct CancelHealthyBreakUseCase {
         catch { throw Failure.journalUnavailable }
     }
 }
+
+struct SetWeeklyViewingGoalUseCase {
+    let repository: WellnessJournalRepository
+    enum Failure: Error, LocalizedError, Equatable {
+        case invalidBudget, journalUnavailable
+        var errorDescription: String? {
+            switch self {
+            case .invalidBudget: return "Enter a whole number from 1 to 10,080 minutes for your seven-day budget, then save again. Choose a goal that fits your own routine."
+            case .journalUnavailable: return journalRecovery
+            }
+        }
+    }
+    @discardableResult
+    func execute(budgetMinutes: Int, now: Date = Date()) throws -> WellnessJournal {
+        guard (1...10080).contains(budgetMinutes) else { throw Failure.invalidBudget }
+        do {
+            var journal = try repository.load()
+            journal.weeklyGoal = WeeklyViewingGoal(budgetMinutes: budgetMinutes, updatedAt: now)
+            try repository.save(journal)
+            return journal
+        } catch let failure as Failure { throw failure }
+        catch { throw Failure.journalUnavailable }
+    }
+}

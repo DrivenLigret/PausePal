@@ -336,15 +336,106 @@ struct RestoreView: View {
 }
 
 struct ReflectView: View {
+    @EnvironmentObject private var model: WellnessViewModel
+    private var reflection: WeeklyReflection { WeeklyReflection(journal: model.journal) }
+    private var largestDailyMinutes: Int {
+        var largest = 1
+        for day in reflection.days {
+            if day.minutes > largest { largest = day.minutes }
+        }
+        return largest
+    }
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 Text("This week").font(.largeTitle.bold())
                 Text("Your records from the last seven days.").foregroundStyle(.secondary)
+                ConfirmationView()
+                GroupBox {
+                    VStack(alignment: .leading, spacing: 16) {
+                        HStack(alignment: .top, spacing: 24) {
+                            VStack(alignment: .leading) {
+                                Text("\(reflection.loggedMinutes)").font(
+                                    .system(.largeTitle, design: .rounded).bold())
+                                Text("minutes logged").font(.caption)
+                            }
+                            Spacer()
+                            VStack(alignment: .leading) {
+                                Text("\(reflection.completedBreakCount)").font(
+                                    .system(.largeTitle, design: .rounded).bold())
+                                Text("breaks completed").font(.caption)
+                            }
+                        }
+                        if let change = reflection.changePercent {
+                            Text(
+                                "Logged minutes are \(Int(abs(change).rounded()))% \(change < 0 ? "lower" : "higher") than the preceding seven days."
+                            ).font(.subheadline)
+                        } else {
+                            Text("Add entries in both weeks to see a comparison.").font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+                GroupBox {
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("Daily viewing entries").font(.headline)
+                        ForEach(reflection.days) { day in
+                            VStack(alignment: .leading, spacing: 5) {
+                                HStack {
+                                    Text(
+                                        day.date.formatted(
+                                            .dateTime.weekday(.abbreviated).day().month(.abbreviated)))
+                                    Spacer()
+                                    Text(day.entryCount == 0 ? "No entries" : "\(day.minutes) min")
+                                }.font(.caption)
+                                ProgressView(value: Double(day.minutes), total: Double(largestDailyMinutes))
+                                    .accessibilityLabel(
+                                        day.date.formatted(date: .abbreviated, time: .omitted)
+                                    )
+                                    .accessibilityValue(
+                                        day.entryCount == 0 ? "No entries" : "\(day.minutes) minutes logged")
+                            }
+                        }
+                    }
+                }
+                GroupBox {
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("Your seven-day viewing budget").font(.title3.bold())
+                        if let goal = reflection.goal {
+                            Text("\(reflection.loggedMinutes) / \(goal.budgetMinutes) minutes logged").font(
+                                .headline)
+                            Text(
+                                reflection.loggedMinutes > goal.budgetMinutes
+                                    ? "You are above your weekly budget."
+                                    : "You are within your weekly budget."
+                            ).font(.subheadline)
+                        }
+                        NumberEntry(title: "Minutes across seven days", text: $model.weeklyBudget)
+                        Button("Save my budget", action: model.saveGoal).buttonStyle(PrimaryButton())
+                    }
+                }
+                GroupBox {
+                    VStack(alignment: .leading, spacing: 16) {
+                        Label("About your data", systemImage: "lock.shield").font(.headline)
+                        Text(
+                            "Records are saved only on this device, without backup. Uninstalling the app deletes them."
+                        )
+                        .font(.footnote).foregroundStyle(.secondary)
+                    }
+                }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
             .padding(20)
         }
         .background(Palette.paper)
+        .scrollDismissesKeyboard(.interactively)
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("Done") {
+                    UIApplication.shared.sendAction(
+                        #selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                }
+            }
+        }
     }
 }

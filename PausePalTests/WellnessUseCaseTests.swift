@@ -171,4 +171,69 @@ final class WellnessUseCaseTests: XCTestCase {
         }
         XCTAssertEqual(repository.journal.activeBreak?.id, active.id)
     }
+    func test_setWeeklyGoal_savesAndReplacesPersonalBudget() throws {
+        let useCase = SetWeeklyViewingGoalUseCase(repository: repository)
+        try useCase.execute(budgetMinutes: 300, now: now)
+        try useCase.execute(budgetMinutes: 240, now: now.addingTimeInterval(1))
+        XCTAssertEqual(repository.journal.weeklyGoal?.budgetMinutes, 240)
+        XCTAssertEqual(repository.journal.weeklyGoal?.updatedAt, now.addingTimeInterval(1))
+    }
+    func test_setWeeklyGoal_acceptsRepresentableBoundaries() throws {
+        let useCase = SetWeeklyViewingGoalUseCase(repository: repository)
+        for budget in [1, 10080] {
+            try useCase.execute(budgetMinutes: budget, now: now)
+            XCTAssertEqual(repository.journal.weeklyGoal?.budgetMinutes, budget)
+        }
+    }
+    func test_setWeeklyGoal_rejectsZeroNegativeAndBeyondSevenDays() {
+        for budget in [0, -1, 10081] {
+            XCTAssertThrowsError(try SetWeeklyViewingGoalUseCase(repository: repository).execute(budgetMinutes: budget, now: now)) {
+                XCTAssertEqual($0 as? SetWeeklyViewingGoalUseCase.Failure, .invalidBudget)
+            }
+        }
+        XCTAssertNil(repository.journal.weeklyGoal)
+    }
+    func test_setWeeklyGoal_failedSavePreservesPreviousBudget() throws {
+        let useCase = SetWeeklyViewingGoalUseCase(repository: repository)
+        try useCase.execute(budgetMinutes: 300, now: now)
+        repository.failSave = true
+        XCTAssertThrowsError(try useCase.execute(budgetMinutes: 240, now: now)) {
+            XCTAssertEqual($0 as? SetWeeklyViewingGoalUseCase.Failure, .journalUnavailable)
+        }
+        XCTAssertEqual(repository.journal.weeklyGoal?.budgetMinutes, 300)
+    }
+}
+
+final class WeeklyReflectionTests: XCTestCase {
+    private var calendar: Calendar {
+        var result = Calendar(identifier: .gregorian)
+        result.timeZone = TimeZone(secondsFromGMT: 0)!
+        return result
+    }
+    private func date(_ day: Int, _ hour: Int = 12) -> Date {
+        calendar.date(from: DateComponents(year: 2026, month: 9, day: day, hour: hour))!
+    }
+    private func entry(_ minutes: Int, _ endedAt: Date) -> ViewingSession {
+        ViewingSession(id: UUID(), durationMinutes: minutes, endedAt: endedAt, mood: nil)
+    }
+    func test_reflection_emptyJournalDoesNotInventImprovement() {
+        let reflection = WeeklyReflection(journal: WellnessJournal(), now: date(14), calendar: calendar)
+        XCTAssertEqual(reflection.days.count, 7)
+        XCTAssertEqual(reflection.loggedMinutes, 0)
+        XCTAssertNil(reflection.changePercent)
+    }
+    func test_reflection_separatesCurrentAndPreviousSevenDaysAtMidnight() {
+        var journal = WellnessJournal()
+        journal.viewingSessions = [entry(10, date(8, 0)), entry(30, date(14)), entry(80, date(7, 23)), entry(999, date(15)), entry(999, date(14, 13))]
+        let result = WeeklyReflection(journal: journal, now: date(14), calendar: calendar)
+        XCTAssertEqual(result.loggedMinutes, 40)
+        XCTAssertEqual(result.previousMinutes, 80)
+        XCTAssertEqual(result.changePercent, -50)
+        XCTAssertEqual(result.entryCount, 2)
+    }
+    func test_reflection_countsOnlyBreaksCompletedWithinWindow() {
+        var journal = WellnessJournal()
+        journal.completedBreaks = [HealthyBreak(id: UUID(), activity: .stretch, startedAt: date(7), completedAt: date(8)), HealthyBreak(id: UUID(), activity: .stretch, startedAt: date(6), completedAt: date(7))]
+        XCTAssertEqual(WeeklyReflection(journal: journal, now: date(14), calendar: calendar).completedBreakCount, 1)
+    }
 }
