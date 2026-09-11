@@ -62,19 +62,19 @@
 		};
 		"00000000000000000000000B" = {
 			"isa" = "PBXGroup";
-			"children" = ("000000000000000000000001", "000000000000000000000002", "000000000000000000000003", "A38C455A15F549519B79D001");
+			"children" = ("000000000000000000000001", "000000000000000000000002", "000000000000000000000003", "A38C455A15F549519B79D001", "A38C455A15F549519B79D002");
 			"path" = "PausePal";
 			"sourceTree" = "<group>";
 		};
 		"00000000000000000000000C" = {
 			"isa" = "PBXGroup";
-			"children" = ("000000000000000000000004");
+			"children" = ("000000000000000000000004", "A38C455A15F549519B79D004");
 			"name" = "Products";
 			"sourceTree" = "<group>";
 		};
 		"00000000000000000000000D" = {
 			"isa" = "PBXGroup";
-			"children" = ("00000000000000000000000B", "00000000000000000000000C");
+			"children" = ("00000000000000000000000B", "00000000000000000000000C", "A38C455A15F549519B79D003");
 			"sourceTree" = "<group>";
 		};
 		"00000000000000000000000E" = {
@@ -159,7 +159,7 @@
 			"buildPhases" = ("000000000000000000000008", "00000000000000000000000A", "000000000000000000000009");
 			"buildRules" = ();
 			"dependencies" = ();
-			"fileSystemSynchronizedGroups" = ("A38C455A15F549519B79D001");
+			"fileSystemSynchronizedGroups" = ("A38C455A15F549519B79D001", "A38C455A15F549519B79D002");
 			"name" = "PausePal";
 			"productName" = "PausePal";
 			"productReference" = "000000000000000000000004";
@@ -180,12 +180,85 @@
 			"productRefGroup" = "00000000000000000000000C";
 			"projectDirPath" = "";
 			"projectRoot" = "";
-			"targets" = ("000000000000000000000014");
+			"targets" = ("000000000000000000000014", "A38C455A15F549519B79D00A");
 		};
 		"A38C455A15F549519B79D001" = {
 			"isa" = "PBXFileSystemSynchronizedRootGroup";
 			"path" = "Domain";
 			"sourceTree" = "<group>";
+		};
+		"A38C455A15F549519B79D002" = {
+			"isa" = "PBXFileSystemSynchronizedRootGroup";
+			"path" = "Data";
+			"sourceTree" = "<group>";
+		};
+		"A38C455A15F549519B79D003" = {
+			"isa" = "PBXFileSystemSynchronizedRootGroup";
+			"path" = "PausePalTests";
+			"sourceTree" = "<group>";
+		};
+		"A38C455A15F549519B79D004" = {
+			"isa" = "PBXFileReference";
+			"explicitFileType" = "wrapper.cfbundle";
+			"includeInIndex" = "0";
+			"path" = "PausePalTests.xctest";
+			"sourceTree" = "BUILT_PRODUCTS_DIR";
+		};
+		"A38C455A15F549519B79D005" = {
+			"isa" = "PBXSourcesBuildPhase";
+			"buildActionMask" = "2147483647";
+			"files" = ();
+			"runOnlyForDeploymentPostprocessing" = "0";
+		};
+		"A38C455A15F549519B79D006" = {
+			"isa" = "PBXFrameworksBuildPhase";
+			"buildActionMask" = "2147483647";
+			"files" = ();
+			"runOnlyForDeploymentPostprocessing" = "0";
+		};
+		"A38C455A15F549519B79D007" = {
+			"isa" = "XCBuildConfiguration";
+			"name" = "Debug";
+			"buildSettings" = {
+				"CODE_SIGN_STYLE" = "Automatic";
+				"GENERATE_INFOPLIST_FILE" = "YES";
+				"LD_RUNPATH_SEARCH_PATHS" = ("$(inherited)", "@executable_path/Frameworks", "@loader_path/Frameworks");
+				"PRODUCT_BUNDLE_IDENTIFIER" = "au.edu.uts.zhengyangyu.PausePalTests";
+				"PRODUCT_NAME" = "$(TARGET_NAME)";
+				"SUPPORTED_PLATFORMS" = "iphoneos iphonesimulator";
+				"TARGETED_DEVICE_FAMILY" = "1";
+			};
+		};
+		"A38C455A15F549519B79D008" = {
+			"isa" = "XCBuildConfiguration";
+			"name" = "Release";
+			"buildSettings" = {
+				"CODE_SIGN_STYLE" = "Automatic";
+				"GENERATE_INFOPLIST_FILE" = "YES";
+				"LD_RUNPATH_SEARCH_PATHS" = ("$(inherited)", "@executable_path/Frameworks", "@loader_path/Frameworks");
+				"PRODUCT_BUNDLE_IDENTIFIER" = "au.edu.uts.zhengyangyu.PausePalTests";
+				"PRODUCT_NAME" = "$(TARGET_NAME)";
+				"SUPPORTED_PLATFORMS" = "iphoneos iphonesimulator";
+				"TARGETED_DEVICE_FAMILY" = "1";
+			};
+		};
+		"A38C455A15F549519B79D009" = {
+			"isa" = "XCConfigurationList";
+			"buildConfigurations" = ("A38C455A15F549519B79D007", "A38C455A15F549519B79D008");
+			"defaultConfigurationIsVisible" = "0";
+			"defaultConfigurationName" = "Release";
+		};
+		"A38C455A15F549519B79D00A" = {
+			"isa" = "PBXNativeTarget";
+			"buildConfigurationList" = "A38C455A15F549519B79D009";
+			"buildPhases" = ("A38C455A15F549519B79D005", "A38C455A15F549519B79D006");
+			"buildRules" = ();
+			"dependencies" = ();
+			"fileSystemSynchronizedGroups" = ("A38C455A15F549519B79D001", "A38C455A15F549519B79D002", "A38C455A15F549519B79D003");
+			"name" = "PausePalTests";
+			"productName" = "PausePalTests";
+			"productReference" = "A38C455A15F549519B79D004";
+			"productType" = "com.apple.product-type.bundle.unit-test";
 		};
 	};
 	"rootObject" = "000000000000000000000015";

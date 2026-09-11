@@ -34,6 +34,11 @@ struct HealthyBreak: Codable, Identifiable, Equatable {
     let activity: RestorativeActivity
     let startedAt: Date
     var completedAt: Date?
+
+    /// The earliest time this break can be completed.
+    var eligibleCompletionAt: Date {
+        startedAt.addingTimeInterval(TimeInterval(activity.minutes * 60))
+    }
 }
 
 /// The user's chosen weekly viewing budget in minutes.
@@ -44,8 +49,28 @@ struct WeeklyViewingGoal: Codable, Equatable {
 
 /// The user's viewing records, breaks and optional weekly goal.
 struct WellnessJournal: Codable, Equatable {
+    var schemaVersion = 1
     var viewingSessions: [ViewingSession] = []
     var activeBreak: HealthyBreak?
     var completedBreaks: [HealthyBreak] = []
     var weeklyGoal: WeeklyViewingGoal?
+}
+
+/// Loads and saves the complete journal.
+protocol WellnessJournalRepository {
+    func load() throws -> WellnessJournal
+    func save(_ journal: WellnessJournal) throws
+}
+
+/// A failure to read the journal format or save its contents.
+enum JournalStorageError: Error, LocalizedError {
+    case unreadable, incompatible, saveFailed
+
+    var errorDescription: String? {
+        switch self {
+        case .unreadable: return "Your saved journal could not be opened. Your records have not been replaced. Close and reopen PausePal, then try again."
+        case .incompatible: return "This journal uses a format PausePal cannot open. Keep your app data and try a compatible app version."
+        case .saveFailed: return "Your journal could not be saved. Check your device storage, then retry. This change has not been recorded."
+        }
+    }
 }
