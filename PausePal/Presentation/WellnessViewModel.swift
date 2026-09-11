@@ -48,4 +48,15 @@ final class WellnessViewModel: ObservableObject {
             errorMessage = error.localizedDescription
         }
     }
+    func startBreak(_ activity: RestorativeActivity) {
+        guard ready else { return }
+        notice = nil
+        do {
+            let useCase = StartHealthyBreakUseCase(repository: repository)
+            journal = try useCase.execute(activity: activity)
+            notice = "Break started."
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
 }

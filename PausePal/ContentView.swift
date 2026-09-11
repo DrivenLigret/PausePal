@@ -246,16 +246,73 @@ struct PauseView: View {
 }
 
 struct RestoreView: View {
+    @EnvironmentObject private var model: WellnessViewModel
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 Text("Activities").font(.largeTitle.bold())
                 Text("Pick something to do away from the screen.").foregroundStyle(.secondary)
+                ConfirmationView()
+                if let active = model.journal.activeBreak {
+                    GroupBox {
+                        VStack(alignment: .leading, spacing: 16) {
+                            Label(active.activity.title, systemImage: active.activity.symbol).font(
+                                .title3.bold())
+                            TimelineView(.periodic(from: .now, by: 1)) { context in
+                                let remaining = active.remainingSeconds(at: context.date)
+                                VStack(alignment: .leading, spacing: 14) {
+                                    Text(String(format: "%02d:%02d", remaining / 60, remaining % 60))
+                                        .font(.system(size: 52, weight: .semibold, design: .rounded))
+                                        .monospacedDigit()
+                                        .accessibilityLabel(
+                                            "\(remaining / 60) minutes and \(remaining % 60) seconds remaining"
+                                        )
+                                    if remaining > 0 {
+                                        Text("The timer continues when you leave the app.")
+                                            .font(.subheadline)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    ForEach(RestorativeActivity.allCases) { activity in
+                        GroupBox {
+                            VStack(alignment: .leading, spacing: 16) {
+                                HStack(alignment: .top) {
+                                    Image(systemName: activity.symbol).font(.title2).foregroundStyle(
+                                        Palette.teal
+                                    )
+                                    .frame(width: 42, height: 42).background(
+                                        Palette.mist, in: RoundedRectangle(cornerRadius: 12))
+                                    VStack(alignment: .leading, spacing: 5) {
+                                        Text(activity.title).font(.headline)
+                                        Text("\(activity.minutes) minute break").font(.caption)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                }
+                                Text(activity.detail).font(.subheadline)
+                                Button("Start \(activity.minutes)-minute break") {
+                                    model.startBreak(activity)
+                                }.buttonStyle(PrimaryButton())
+                            }
+                        }
+                    }
+                }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
             .padding(20)
         }
         .background(Palette.paper)
+        .scrollDismissesKeyboard(.interactively)
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("Done") {
+                    UIApplication.shared.sendAction(
+                        #selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                }
+            }
+        }
     }
 }
 

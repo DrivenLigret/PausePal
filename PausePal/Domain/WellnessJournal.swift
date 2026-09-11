@@ -25,10 +25,17 @@ struct ViewingSession: Codable, Identifiable, Equatable {
 }
 
 /// An activity the user can choose for a break from viewing.
-enum RestorativeActivity: String, Codable, CaseIterable {
+enum RestorativeActivity: String, Codable, CaseIterable, Identifiable {
     case stretch, drinkWater, outdoorWalk, connectWithFriend
-
-    /// The planned length of the activity in minutes.
+    var id: String { rawValue }
+    var title: String {
+        switch self {
+        case .stretch: return "Stretch gently"
+        case .drinkWater: return "Get a drink of water"
+        case .outdoorWalk: return "Take a short walk"
+        case .connectWithFriend: return "Connect with a friend"
+        }
+    }
     var minutes: Int {
         switch self {
         case .stretch: return 2
@@ -37,10 +44,30 @@ enum RestorativeActivity: String, Codable, CaseIterable {
         case .connectWithFriend: return 10
         }
     }
+    var symbol: String {
+        switch self {
+        case .stretch: return "figure.flexibility"
+        case .drinkWater: return "drop"
+        case .outdoorWalk: return "figure.walk"
+        case .connectWithFriend: return "person.2"
+        }
+    }
+    var detail: String {
+        switch self {
+        case .stretch: return "Move at a pace that feels comfortable."
+        case .drinkWater: return "Step away from your screen for a moment."
+        case .outdoorWalk: return "Choose a safe, comfortable place nearby."
+        case .connectWithFriend: return "Have a conversation away from the feed."
+        }
+    }
+}
+
+protocol TimedWellnessBreak {
+    func remainingSeconds(at date: Date) -> Int
 }
 
 /// A chosen break. A nil completion date means it has not been completed.
-struct HealthyBreak: Codable, Identifiable, Equatable {
+struct HealthyBreak: Codable, Identifiable, Equatable, TimedWellnessBreak {
     let id: UUID
     let activity: RestorativeActivity
     let startedAt: Date
@@ -49,6 +76,13 @@ struct HealthyBreak: Codable, Identifiable, Equatable {
     /// The earliest time this break can be completed.
     var eligibleCompletionAt: Date {
         startedAt.addingTimeInterval(TimeInterval(activity.minutes * 60))
+    }
+
+    /// The remaining whole seconds, rounded up and never below zero.
+    func remainingSeconds(at date: Date) -> Int {
+        let seconds = eligibleCompletionAt.timeIntervalSince(date)
+        if seconds <= 0 { return 0 }
+        return Int(ceil(seconds))
     }
 }
 

@@ -28,6 +28,10 @@ final class WellnessUseCaseTests: XCTestCase {
     private func record(_ minutes: Int, endedAt: Date? = nil) throws {
         try RecordViewingSessionUseCase(repository: repository).execute(minutes: minutes, endedAt: endedAt ?? now, mood: .bored, now: now)
     }
+    private func start() throws -> HealthyBreak {
+        let journal = try StartHealthyBreakUseCase(repository: repository).execute(activity: .stretch, now: now)
+        return try XCTUnwrap(journal.activeBreak)
+    }
     func test_recordViewing_savesDurationAndOptionalMood() throws {
         try record(25)
         XCTAssertEqual(repository.journal.viewingSessions.count, 1)
@@ -76,5 +80,25 @@ final class WellnessUseCaseTests: XCTestCase {
             XCTAssertEqual($0 as? RecordViewingSessionUseCase.Failure, .journalUnavailable)
         }
         XCTAssertTrue(repository.journal.viewingSessions.isEmpty)
+    }
+    func test_startBreak_persistsChosenActivityAndStartTime() throws {
+        let active = try start()
+        XCTAssertEqual(active.activity, .stretch)
+        XCTAssertEqual(active.startedAt, now)
+        XCTAssertNil(active.completedAt)
+    }
+    func test_startBreak_cannotReplaceExistingBreak() throws {
+        let original = try start()
+        XCTAssertThrowsError(try StartHealthyBreakUseCase(repository: repository).execute(activity: .outdoorWalk, now: now)) {
+            XCTAssertEqual($0 as? StartHealthyBreakUseCase.Failure, .breakAlreadyActive)
+        }
+        XCTAssertEqual(repository.journal.activeBreak?.id, original.id)
+    }
+    func test_startBreak_failedSaveLeavesNoActiveBreak() {
+        repository.failSave = true
+        XCTAssertThrowsError(try start()) {
+            XCTAssertEqual($0 as? StartHealthyBreakUseCase.Failure, .journalUnavailable)
+        }
+        XCTAssertNil(repository.journal.activeBreak)
     }
 }

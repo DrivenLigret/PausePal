@@ -33,3 +33,27 @@ struct RecordViewingSessionUseCase {
         catch { throw Failure.journalUnavailable }
     }
 }
+
+struct StartHealthyBreakUseCase {
+    let repository: WellnessJournalRepository
+    enum Failure: Error, LocalizedError, Equatable {
+        case breakAlreadyActive, journalUnavailable
+        var errorDescription: String? {
+            switch self {
+            case .breakAlreadyActive: return "You already have a break in progress. Return to Restore to finish or cancel it first."
+            case .journalUnavailable: return journalRecovery
+            }
+        }
+    }
+    @discardableResult
+    func execute(activity: RestorativeActivity, now: Date = Date()) throws -> WellnessJournal {
+        do {
+            var journal = try repository.load()
+            guard journal.activeBreak == nil else { throw Failure.breakAlreadyActive }
+            journal.activeBreak = HealthyBreak(id: UUID(), activity: activity, startedAt: now, completedAt: nil)
+            try repository.save(journal)
+            return journal
+        } catch let failure as Failure { throw failure }
+        catch { throw Failure.journalUnavailable }
+    }
+}
