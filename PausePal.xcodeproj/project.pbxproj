@@ -3,7 +3,7 @@
 	"archiveVersion" = "1";
 	"classes" = {
 	};
-	"objectVersion" = "77";
+	"objectVersion" = "70";
 	"objects" = {
 		"000000000000000000000001" = {
 			"isa" = "PBXFileReference";
@@ -62,7 +62,7 @@
 		};
 		"00000000000000000000000B" = {
 			"isa" = "PBXGroup";
-			"children" = ("000000000000000000000001", "000000000000000000000002", "000000000000000000000003", "A38C455A15F549519B79D001", "A38C455A15F549519B79D002");
+			"children" = ("000000000000000000000001", "000000000000000000000002", "000000000000000000000003", "A38C455A15F549519B79D001", "A38C455A15F549519B79D002", "A38C455A15F549519B79D00B", "A38C455A15F549519B79D00C");
 			"path" = "PausePal";
 			"sourceTree" = "<group>";
 		};
@@ -159,7 +159,7 @@
 			"buildPhases" = ("000000000000000000000008", "00000000000000000000000A", "000000000000000000000009");
 			"buildRules" = ();
 			"dependencies" = ();
-			"fileSystemSynchronizedGroups" = ("A38C455A15F549519B79D001", "A38C455A15F549519B79D002");
+			"fileSystemSynchronizedGroups" = ("A38C455A15F549519B79D001", "A38C455A15F549519B79D002", "A38C455A15F549519B79D00B", "A38C455A15F549519B79D00C");
 			"name" = "PausePal";
 			"productName" = "PausePal";
 			"productReference" = "000000000000000000000004";
@@ -186,16 +186,25 @@
 			"isa" = "PBXFileSystemSynchronizedRootGroup";
 			"path" = "Domain";
 			"sourceTree" = "<group>";
+			"explicitFileTypes" = {
+			};
+			"explicitFolders" = ();
 		};
 		"A38C455A15F549519B79D002" = {
 			"isa" = "PBXFileSystemSynchronizedRootGroup";
 			"path" = "Data";
 			"sourceTree" = "<group>";
+			"explicitFileTypes" = {
+			};
+			"explicitFolders" = ();
 		};
 		"A38C455A15F549519B79D003" = {
 			"isa" = "PBXFileSystemSynchronizedRootGroup";
 			"path" = "PausePalTests";
 			"sourceTree" = "<group>";
+			"explicitFileTypes" = {
+			};
+			"explicitFolders" = ();
 		};
 		"A38C455A15F549519B79D004" = {
 			"isa" = "PBXFileReference";
@@ -254,11 +263,21 @@
 			"buildPhases" = ("A38C455A15F549519B79D005", "A38C455A15F549519B79D006");
 			"buildRules" = ();
 			"dependencies" = ();
-			"fileSystemSynchronizedGroups" = ("A38C455A15F549519B79D001", "A38C455A15F549519B79D002", "A38C455A15F549519B79D003");
+			"fileSystemSynchronizedGroups" = ("A38C455A15F549519B79D001", "A38C455A15F549519B79D002", "A38C455A15F549519B79D003", "A38C455A15F549519B79D00B");
 			"name" = "PausePalTests";
 			"productName" = "PausePalTests";
 			"productReference" = "A38C455A15F549519B79D004";
 			"productType" = "com.apple.product-type.bundle.unit-test";
+		};
+		"A38C455A15F549519B79D00B" = {
+			"isa" = "PBXFileSystemSynchronizedRootGroup";
+			"path" = "Application";
+			"sourceTree" = "<group>";
+		};
+		"A38C455A15F549519B79D00C" = {
+			"isa" = "PBXFileSystemSynchronizedRootGroup";
+			"path" = "Presentation";
+			"sourceTree" = "<group>";
 		};
 	};
 	"rootObject" = "000000000000000000000015";

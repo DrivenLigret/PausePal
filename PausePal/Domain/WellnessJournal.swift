@@ -1,8 +1,19 @@
 import Foundation
 
 /// An optional feeling recorded after watching short videos.
-enum ViewingMood: String, Codable, CaseIterable {
+enum ViewingMood: String, Codable, CaseIterable, Identifiable {
     case relaxed, bored, tired, restless
+
+    var id: String { rawValue }
+    var title: String { rawValue.capitalized }
+    var symbol: String {
+        switch self {
+        case .relaxed: return "leaf"
+        case .bored: return "cloud"
+        case .tired: return "moon"
+        case .restless: return "wind"
+        }
+    }
 }
 
 /// A viewing estimate entered by the user, with an optional mood.

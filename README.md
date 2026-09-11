@@ -3,7 +3,9 @@
 An iOS app for recording short-video viewing and taking breaks.
 
 ## Current step
-Domain models and local JSON storage are in place. The app currently displays its name.
+Viewing records can be entered on Today and saved locally. Saving opens Pause; Today shows the day's total and entries. Mood is optional. Activities and weekly reflection will be completed in later steps.
+
+Viewing duration must be 1–1,440 minutes. Future end times and duplicate time/duration pairs are rejected.
 
 The repository loads and saves the journal in Application Support. Invalid or unsupported files produce an error when loaded and are left in place.
 
@@ -13,4 +15,4 @@ Open PausePal.xcodeproj, select the PausePal scheme and an iPhone simulator, the
 Requires Xcode 16 or later and iOS 17 or later. No external packages.
 
 ## Tests
-Press Command-U to run the six journal storage tests.
+Press Command-U to run the journal storage and viewing-record tests.
