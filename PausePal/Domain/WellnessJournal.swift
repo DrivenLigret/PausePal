@@ -17,6 +17,9 @@ enum ViewingMood: String, Codable, CaseIterable, Identifiable {
 }
 
 /// A viewing estimate entered by the user, with an optional mood.
+///
+/// Each record must contain 1–1,440 minutes and cannot end in the future when added.
+/// The same end time and duration cannot be recorded twice.
 struct ViewingSession: Codable, Identifiable, Equatable {
     let id: UUID
     let durationMinutes: Int
@@ -25,6 +28,9 @@ struct ViewingSession: Codable, Identifiable, Equatable {
 }
 
 /// An activity the user can choose for a break from viewing.
+///
+/// Stretching, drinking water, walking and connecting with a friend take
+/// 2, 3, 5 and 10 minutes respectively before completion is allowed.
 enum RestorativeActivity: String, Codable, CaseIterable, Identifiable {
     case stretch, drinkWater, outdoorWalk, connectWithFriend
     var id: String { rawValue }
@@ -62,11 +68,15 @@ enum RestorativeActivity: String, Codable, CaseIterable, Identifiable {
     }
 }
 
+/// A break with a countdown that determines when its required rest time has elapsed.
 protocol TimedWellnessBreak {
     func remainingSeconds(at date: Date) -> Int
 }
 
-/// A chosen break. A nil completion date means it has not been completed.
+/// A chosen activity break, timed from its recorded start.
+///
+/// Completion is allowed only after the activity's full duration has elapsed.
+/// An unfinished break has no completion date. Cancelling it does not count as completion.
 struct HealthyBreak: Codable, Identifiable, Equatable, TimedWellnessBreak {
     let id: UUID
     let activity: RestorativeActivity
@@ -87,12 +97,19 @@ struct HealthyBreak: Codable, Identifiable, Equatable, TimedWellnessBreak {
 }
 
 /// The user's chosen weekly viewing budget in minutes.
+///
+/// The budget must be 1–10,080 minutes for a seven-day window.
+/// Saving a new budget replaces the previous one.
 struct WeeklyViewingGoal: Codable, Equatable {
     let budgetMinutes: Int
     let updatedAt: Date
 }
 
 /// The user's viewing records, breaks and optional weekly goal.
+///
+/// At most one break may be active, and it must be unfinished.
+/// A completed break cannot also be active or appear twice in the completed records.
+/// Viewing records must have unique identifiers.
 struct WellnessJournal: Codable, Equatable {
     var schemaVersion = 1
     var viewingSessions: [ViewingSession] = []

@@ -1,6 +1,9 @@
 import Foundation
 
-/// One local calendar day's self-reported viewing. No entries is missing observation, not proof of no use.
+/// One local calendar day's self-reported viewing.
+///
+/// Minutes belong to the day on which the viewing record ends.
+/// No entries means missing observation, not proof of no viewing.
 struct DailyViewingTotal: Identifiable {
     let date: Date
     let minutes: Int
@@ -9,7 +12,10 @@ struct DailyViewingTotal: Identifiable {
 }
 
 /// A read-only seven-day projection, including today and excluding future entries.
+///
 /// The previous window is the immediately preceding seven local calendar days.
+/// Only breaks completed within the current window count toward its total.
+/// Percentage change requires records in both windows and a positive previous total.
 struct WeeklyReflection {
     let days: [DailyViewingTotal]
     let completedBreakCount: Int
