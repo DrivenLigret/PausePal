@@ -3,7 +3,7 @@
 An iOS app for recording short-video viewing and taking breaks.
 
 ## Current step
-Initial SwiftUI project. The app currently displays its name; business features have not been added.
+Basic domain models for viewing sessions, moods, restorative activities, breaks and weekly goals. The app currently displays its name.
 
 ## Run
 Open PausePal.xcodeproj, select the PausePal scheme and an iPhone simulator, then press Command-R.
