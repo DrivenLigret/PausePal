@@ -101,4 +101,74 @@ final class WellnessUseCaseTests: XCTestCase {
         }
         XCTAssertNil(repository.journal.activeBreak)
     }
+    func test_completeBreak_acceptsExactDurationBoundary() throws {
+        let active = try start()
+        let timedBreak: TimedWellnessBreak = active
+        XCTAssertEqual(timedBreak.remainingSeconds(at: now.addingTimeInterval(120)), 0)
+        XCTAssertEqual(timedBreak.remainingSeconds(at: now.addingTimeInterval(121)), 0)
+        try CompleteHealthyBreakUseCase(repository: repository).execute(breakID: active.id, now: now.addingTimeInterval(120))
+        XCTAssertNil(repository.journal.activeBreak)
+        XCTAssertEqual(repository.journal.completedBreaks.count, 1)
+        XCTAssertEqual(repository.journal.completedBreaks.first?.completedAt, now.addingTimeInterval(120))
+    }
+    func test_completeBreak_rejectsOneSecondBeforeBoundary() throws {
+        let active = try start()
+        let timedBreak: TimedWellnessBreak = active
+        XCTAssertEqual(timedBreak.remainingSeconds(at: now.addingTimeInterval(119)), 1)
+        XCTAssertEqual(timedBreak.remainingSeconds(at: now.addingTimeInterval(119.9)), 1)
+        XCTAssertThrowsError(try CompleteHealthyBreakUseCase(repository: repository).execute(breakID: active.id, now: now.addingTimeInterval(119))) {
+            XCTAssertEqual($0 as? CompleteHealthyBreakUseCase.Failure, .tooEarly(secondsRemaining: 1))
+        }
+        XCTAssertNotNil(repository.journal.activeBreak)
+        XCTAssertTrue(repository.journal.completedBreaks.isEmpty)
+    }
+    func test_completeBreak_rejectsClockMovingBackward() throws {
+        let active = try start()
+        XCTAssertThrowsError(try CompleteHealthyBreakUseCase(repository: repository).execute(breakID: active.id, now: now.addingTimeInterval(-1))) {
+            XCTAssertEqual($0 as? CompleteHealthyBreakUseCase.Failure, .clockMovedBackward)
+        }
+    }
+    func test_completeBreak_rejectsStaleBreakIdentifier() throws {
+        _ = try start()
+        XCTAssertThrowsError(try CompleteHealthyBreakUseCase(repository: repository).execute(breakID: UUID(), now: now.addingTimeInterval(120))) {
+            XCTAssertEqual($0 as? CompleteHealthyBreakUseCase.Failure, .breakChanged)
+        }
+    }
+    func test_completeBreak_cannotAwardCompletionTwice() throws {
+        let active = try start()
+        let useCase = CompleteHealthyBreakUseCase(repository: repository)
+        try useCase.execute(breakID: active.id, now: now.addingTimeInterval(120))
+        XCTAssertThrowsError(try useCase.execute(breakID: active.id, now: now.addingTimeInterval(125))) {
+            XCTAssertEqual($0 as? CompleteHealthyBreakUseCase.Failure, .noActiveBreak)
+        }
+        XCTAssertEqual(repository.journal.completedBreaks.count, 1)
+    }
+    func test_completeBreak_failedSavePreservesActiveBreakForRetry() throws {
+        let active = try start()
+        repository.failSave = true
+        XCTAssertThrowsError(try CompleteHealthyBreakUseCase(repository: repository).execute(breakID: active.id, now: now.addingTimeInterval(120))) {
+            XCTAssertEqual($0 as? CompleteHealthyBreakUseCase.Failure, .journalUnavailable)
+        }
+        XCTAssertEqual(repository.journal.activeBreak?.id, active.id)
+        XCTAssertTrue(repository.journal.completedBreaks.isEmpty)
+    }
+    func test_cancelBreak_removesActiveWithoutCompletionCredit() throws {
+        let active = try start()
+        try CancelHealthyBreakUseCase(repository: repository).execute(breakID: active.id)
+        XCTAssertNil(repository.journal.activeBreak)
+        XCTAssertTrue(repository.journal.completedBreaks.isEmpty)
+    }
+    func test_cancelBreak_rejectsMissingBreak() {
+        XCTAssertThrowsError(try CancelHealthyBreakUseCase(repository: repository).execute(breakID: UUID())) {
+            XCTAssertEqual($0 as? CancelHealthyBreakUseCase.Failure, .noMatchingBreak)
+        }
+    }
+    func test_cancelBreak_failedSavePreservesActiveBreak() throws {
+        let active = try start()
+        repository.failSave = true
+        XCTAssertThrowsError(try CancelHealthyBreakUseCase(repository: repository).execute(breakID: active.id)) {
+            XCTAssertEqual($0 as? CancelHealthyBreakUseCase.Failure, .journalUnavailable)
+        }
+        XCTAssertEqual(repository.journal.activeBreak?.id, active.id)
+    }
 }

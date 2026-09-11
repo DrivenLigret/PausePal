@@ -247,6 +247,7 @@ struct PauseView: View {
 
 struct RestoreView: View {
     @EnvironmentObject private var model: WellnessViewModel
+    @State private var confirmCancel = false
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
@@ -267,13 +268,31 @@ struct RestoreView: View {
                                         .accessibilityLabel(
                                             "\(remaining / 60) minutes and \(remaining % 60) seconds remaining"
                                         )
-                                    if remaining > 0 {
-                                        Text("The timer continues when you leave the app.")
-                                            .font(.subheadline)
+                                    Text(
+                                        remaining == 0
+                                            ? "Finished your activity? Tap Complete break."
+                                            : "The timer continues when you leave the app."
+                                    )
+                                    .font(.subheadline)
+                                    Button(remaining == 0 ? "Complete break" : "Break in progress") {
+                                        model.completeBreak(active.id)
                                     }
+                                    .buttonStyle(PrimaryButton()).disabled(remaining > 0).opacity(
+                                        remaining > 0 ? 0.55 : 1)
                                 }
                             }
+                            Button("Cancel this break", role: .destructive) { confirmCancel = true }.frame(
+                                minHeight: 44)
+                            Text("Come back to record completion. There is no end notification.")
+                                .font(.footnote).foregroundStyle(.secondary)
                         }
+                    }
+                    .confirmationDialog(
+                        "Cancel this break? It will not count as completed.", isPresented: $confirmCancel,
+                        titleVisibility: .visible
+                    ) {
+                        Button("Cancel break", role: .destructive) { model.cancelBreak(active.id) }
+                        Button("Keep resting", role: .cancel) {}
                     }
                 } else {
                     ForEach(RestorativeActivity.allCases) { activity in

@@ -59,4 +59,26 @@ final class WellnessViewModel: ObservableObject {
             errorMessage = error.localizedDescription
         }
     }
+    func completeBreak(_ id: UUID) {
+        guard ready else { return }
+        notice = nil
+        do {
+            let useCase = CompleteHealthyBreakUseCase(repository: repository)
+            journal = try useCase.execute(breakID: id)
+            notice = "Break completed."
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+    func cancelBreak(_ id: UUID) {
+        guard ready else { return }
+        notice = nil
+        do {
+            let useCase = CancelHealthyBreakUseCase(repository: repository)
+            journal = try useCase.execute(breakID: id)
+            notice = "Break cancelled."
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
 }
