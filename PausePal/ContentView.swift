@@ -367,9 +367,14 @@ struct ReflectView: View {
                             }
                         }
                         if let change = reflection.changePercent {
-                            Text(
-                                "Logged minutes are \(Int(abs(change).rounded()))% \(change < 0 ? "lower" : "higher") than the preceding seven days."
-                            ).font(.subheadline)
+                            if change == 0 {
+                                Text("Logged minutes are the same as the preceding seven days.")
+                                    .font(.subheadline)
+                            } else {
+                                Text(
+                                    "Logged minutes are \(Int(abs(change).rounded()))% \(change < 0 ? "lower" : "higher") than the preceding seven days."
+                                ).font(.subheadline)
+                            }
                         } else {
                             Text("Add entries in both weeks to see a comparison.").font(.subheadline)
                                 .foregroundStyle(.secondary)
