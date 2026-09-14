@@ -1,24 +1,28 @@
 # PausePal
 
-An iOS app for recording short-video viewing and taking breaks.
+Zhengyang Yu | zhengyang.yu-2@student.uts.edu.au
 
-## Current step
-Viewing records can be entered on Today and saved locally. Saving opens Pause; Today shows the day's total and entries. Mood is optional.
+PausePal allows teens to log short video viewing, select a weekly break and reflect on their week. Time will be entered manually, and mood will be optional.
 
-Restore offers four activities with 2, 3, 5 and 10 minute breaks. Only one break can be active. Its start time is saved, so the countdown continues after reopening the app.
+## Project
 
-A break can be completed once its timer reaches zero, or cancelled after confirmation. Cancelling does not add a completed break.
+The app consists of four screens: Today, Pause, Restore and Reflect. It has 5 use cases which include viewing, starting a break, ending a break, cancelling a break and setting the weekly viewing budget.
 
-Reflect shows viewing records from today and the previous six days, completed breaks in that period and a comparison with the preceding seven days. The weekly viewing budget can be saved and changed, from 1 to 10,080 minutes.
+ViewModel of WellnessViewModel is used by SwiftUI views to call the use cases. Journal domain models represent the rules and the journal. FileWellnessJournalRepository is responsible for persisting the wellness journal to the file system as JSON. The Swift files include DocC comments for the documentation of the model.
 
-Viewing duration must be 1–1,440 minutes. Future end times and duplicate time/duration pairs are rejected.
+## Run and test
 
-The repository loads and saves the journal in Application Support. Invalid or unsupported files produce an error when loaded and are left in place.
+Open the PausePal.xcodeproj file, choose the PausePal scheme and an iPhone simulator. To run, press Command-R, to run the 33 unit tests, press Command-U.
 
-## Run
-Open PausePal.xcodeproj, select the PausePal scheme and an iPhone simulator, then press Command-R.
+Must be running iOS 17 or newer. No external packages. Validated using Xcode 26.6 on an iPhone 17 Pro simulator running on iOS 26.5.
 
-Requires Xcode 16 or later and iOS 17 or later. No external packages.
+## Repository
 
-## Tests
-Press Command-U to run all 33 journal storage, use-case and weekly reflection tests.
+https://github.com/DrivenLigret/PausePal
+
+Source version: `44eb63e`.
+
+## Documents
+
+Human_System_Architecture.pdf: One page architecture diagram.
+Reflective_Report.pdf: 640-word reflective report.
